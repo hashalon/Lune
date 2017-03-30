@@ -2,8 +2,8 @@
 *.txt
 
 # ignore build file
-/build
+build/*
 
 # except for libraries
-!/build/struct.lua
+!build/struct.lua
 
