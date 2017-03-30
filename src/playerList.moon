@@ -1,9 +1,5 @@
 require 'player'
 
-names = {"Robert", "Marco", "Alfred", "Messi", "Norton", "Boris", "George", "Janine", "Maria"}
-
-NAME = names[math.floor math.random 1,#names]
-
 -- class to manage a list of clients
 export playerList
 playerList =

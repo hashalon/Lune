@@ -6,4 +6,6 @@ build/*
 
 # except for libraries
 !build/struct.lua
+#!build/utf8.lua
+#!build/debug.lua
 

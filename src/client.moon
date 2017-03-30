@@ -7,8 +7,17 @@ require 'playerList'
 
 export love
 
-myPlayer = Player 0, 400, 300,
-    math.random(5,255), math.random(5,255), math.random(5,255), NAME
+-- we need to change the seed to get new values
+math.randomseed os.time!
+
+names = {"Robert", "Marco", "Alfred", "Messi", "Norton", "Boris", "George", "Janine", "Maria"}
+
+NAME  = names[math.floor math.random 1,#names]
+RED   = math.random(5,255)
+GREEN = math.random(5,255)
+BLUE  = math.random(5,255)
+
+myPlayer = Player 0, 400, 300, RED, GREEN, BLUE, NAME
 
 -- initialize the client
 client =

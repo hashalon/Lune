@@ -19,15 +19,24 @@ UNPACK =
     full: (packed)->
         return nil if packed == nil
         info = {}
-        info.id, info.x, info.y, info.red, info.green, info.blue, info.name = struct.unpack('<BffBBBs', packed)
+        info.id, info.x, info.y, info.red, info.green, info.blue, info.name = struct.unpack('<BffBBBs', tostring packed)
         return info
     
     pos: (packed)->
         return nil if packed == nil
         info = {}
-        info.id, info.x, info.y = struct.unpack('<Bff', packed)
+        info.id, info.x, info.y = struct.unpack('<Bff', tostring packed)
         return info
     
     id: (packed)->
         return nil if packed == nil
-        return struct.unpack('<B', packed)
+        return struct.unpack('<B', tostring packed)
+
+export debug_print
+debug_print = (trame)->
+    str = 'trame: '
+    for i = 1,#trame
+        char = trame\sub(i,i)\byte!
+        str ..= char..', '
+    print str
+    return str

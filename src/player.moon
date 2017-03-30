@@ -1,5 +1,10 @@
 require 'coder'
 
+fixString = (str)->
+    if str == nil
+        return 'noname'
+    return tostring str
+
 export Player
 class  Player
     
@@ -10,7 +15,7 @@ class  Player
         else
             @id, @x, @y = id or 0, x or 0, y or 0
             @red, @green, @blue = red or 255, green or 255, blue or 255
-            @name  = name or 'noname'
+            @name = fixString name
         @radius = 10
         @speed  =  2
     
@@ -18,7 +23,7 @@ class  Player
     set: (info)=>
         @id, @x, @y = info.id or 0, info.x or 0, info.y or 0
         @red, @green, @blue = info.red or 255, info.green or 255, info.blue or 255
-        @name  = info.name or 'noname'
+        @name = fixString info.name
         return @
     
     inputs: =>
@@ -43,7 +48,7 @@ class  Player
         gfx.setColor @red, @green, @blue
         gfx.circle 'fill', @x, @y, @radius, @radius
         gfx.setColor 255, 255, 255
-        --gfx.print @name, @x - (gfx.getFont!\getWidth(@name)/2), @y - (@radius + gfx.getFont!\getHeight!)
+        gfx.print @name, @x - (gfx.getFont!\getWidth(@name)/2), @y - (@radius + gfx.getFont!\getHeight!)
     
     -- dump infos into a string data
     dump: (all)=>

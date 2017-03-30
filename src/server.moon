@@ -7,6 +7,9 @@ require 'playerList'
 
 export love
 
+-- we need to change the seed to get new values
+math.randomseed os.time!
+
 -- initialize the server
 server =
     
@@ -44,8 +47,7 @@ server =
     -- connection of new character
     connect: (event, info)=>
         if info ~= nil
-            -- decode all the informations regarding the new player
-            info = fill event.data, true
+            
             -- get next available ID for this new player
             index = playerList\availableID!
             
