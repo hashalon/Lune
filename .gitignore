@@ -1,0 +1,9 @@
+# ignore all txt files
+*.txt
+
+# ignore build file
+/build
+
+# except for libraries
+!/build/struct.lua
+
