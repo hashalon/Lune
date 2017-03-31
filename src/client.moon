@@ -1,23 +1,49 @@
 -- server script for littleNET
 require 'enet'
 require 'message'
-require 'coder'
+require 'pack'
 require 'player'
 require 'playerList'
 
 export love
 
--- we need to change the seed to get new values
-math.randomseed os.time!
+-- the player we are playing with
+myPlayer = Player 0, 400, 300
 
-names = {"Robert", "Marco", "Alfred", "Messi", "Norton", "Boris", "George", "Janine", "Maria"}
+-- funtion to compare two number (with an error)
+compare = (a,b,d)-> math.abs(a - b) > d
 
-NAME  = names[math.floor math.random 1,#names]
-RED   = math.random(5,255)
-GREEN = math.random(5,255)
-BLUE  = math.random(5,255)
+-- store all of the inputs
+compensation =
+    
+    -- do we still need to interpolate the position of the player
+    keepInterpolating: false
+    
+    interpolation: 0.1
+    threshold:     0.1
+    newX: myPlayer.x
+    newY: myPlayer.y
+    list: {} -- list of inputs
+    
+    add: (bin)=> @list[#@list+1] = bin
+    
+    -- aplly the inputs on the last state of the player
+    apply: (x, y)=>
+        temp = {:x, :y, speed: myPlayer.speed}
+        for i = 1,#@list
+            -- we call the inputs function of player on a dummy object
+            myPlayer.inputs temp,@list[i]
+        @list = {} -- clear the list
+        @newX, @newY = temp.x, temp.y
+        keepInterpolating = true
+    
+    interpolate: =>
+        myPlayer\refresh @newX,@newY,@interpolation
+        keepInterpolating = (
+            compare(myPlayer.x, @newX, @threshold) or
+            compare(myPlayer.y, @newY, @threshold)
+        )
 
-myPlayer = Player 0, 400, 300, RED, GREEN, BLUE, NAME
 
 -- initialize the client
 client =
@@ -32,36 +58,42 @@ client =
     -- update the server at regular intervals
     update: (deltaTime)=>
         -- move the player
-        changed = myPlayer\inputs!
+        inputs = getInputs!
         -- recover events from the server
         event = @host\service!
         if event
             switch event.type
                 when 'connect'
-                    event.peer\send message.connection..myPlayer\dump true
+                    event.peer\send message.connection..PACK.full myPlayer
                     @peer = event.peer
                 when 'receive'
                     msgType = event.data\sub 1,1
                     msgData = event.data\sub 2
                     switch msgType
                         when message.refresh
-                            @refresh event, fill(msgData)
+                            @refresh     event, UNPACK.pos  msgData
                         when message.assignment
-                            @assign  event, UNPACK.id msgData
+                            @assign      event, UNPACK.id   msgData
                         when message.instance
-                            @instantiate event, fill(msgData, true)
+                            @instantiate event, UNPACK.full msgData
                         when message.connection
-                            @connect event, fill(msgData, true)
+                            @connect     event, UNPACK.full msgData
                         when message.disconnection
-                            @disconnect event, UNPACK.id msgData
-        -- if the player moved 
-        @peer\send message.refresh..myPlayer\dump! if changed and @peer
+                            @disconnect  event, UNPACK.id   msgData
+        -- if the player moved
+        if @peer and (inputs ~= 0)
+            compensation\add inputs -- keep track of the inputs
+            myPlayer\inputs  inputs -- apply directly inputs to avoid lags
+            @peer\send message.inputs..PACK.inputs myPlayer.id,inputs
+        
+        -- if we need to keep on interpolating, keep interpolate
+        compensation\interpolate! if compensation.keepInterpolating
         
         -- keep connection with server open
         @server\ping!
-        @connected = @server\round_trip_time!
+        @deltaTime = @server\round_trip_time!
         
-        if @connected >= 500 then @error = "DISCONNECTED"
+        if @deltaTime >= 500 then @error = "DISCONNECTED"
         else @error = nil
             
     
@@ -71,7 +103,10 @@ client =
             -- update the position of the player
             player = playerList\get(info.id)
             if player ~= nil
-                player\update info.x, info.y
+                if player == myPlayer
+                    compensation\apply info.x,info.y
+                else
+                    player\refresh info.x,info.y
             else love.errhand 'Player does not exists for id: '..info.id..'\n'..playerList\toString!
         else love.errhand 'Refresh failed, info is nil.'
             
@@ -82,7 +117,7 @@ client =
             -- it match the id on the server side
             myPlayer.id = id
             -- add our player to the list
-            playerList\set id,myPLayer
+            playerList\set id,myPlayer
         else love.errhand 'Assignment failed, id is nil.'
     
     -- recover information regarding existing player
@@ -114,16 +149,21 @@ client =
         @server\disconnect_later!
         @host\flush!
 
-
-draw   = ->
-    playerList\draw!
-    myPlayer\draw!
 update = (dt)-> client\update dt
 quit   = -> client\quit!
+draw   = -> playerList\draw!
+--myPlayer\draw!
 
 export LOAD
 LOAD = (args)->
-    love.window.setTitle "CLIENT"
-    client\init "localhost", "18666"
+    for i,arg in pairs args
+        nextArg = args[i+1]
+        switch arg
+            when '--name' then myPlayer.name  = nextArg or 'noname'
+            when '-r'     then myPlayer.red   = nextArg or math.random(5,255)
+            when '-g'     then myPlayer.green = nextArg or math.random(5,255)
+            when '-b'     then myPlayer.blue  = nextArg or math.random(5,255)
+    love.window.setTitle 'CLIENT '..myPlayer.name
+    client\init ADDRESS,PORT
     love.draw, love.update, love.quit = draw, update, quit
     

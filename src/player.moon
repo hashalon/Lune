@@ -1,4 +1,4 @@
-require 'coder'
+bit = require 'bit'
 
 fixString = (str)->
     if str == nil
@@ -26,20 +26,26 @@ class  Player
         @name = fixString info.name
         return @
     
-    inputs: =>
-        kb, dx, dy = love.keyboard.isDown, 0, 0
-        dy = -@speed if kb 'up'
-        dy =  @speed if kb 'down'
-        dx = -@speed if kb 'left'
-        dx =  @speed if kb 'right'
-        @x += dx
-        @y += dy
-        return dx ~= 0 or dy ~= 0
-    
-    -- update the position of the character
-    update: (x, y)=>
-        @x = x
-        @y = y
+    inputs: (bin)=>
+        dx = bit.band bin,0x3 -- 0011
+        dy = bit.band bin,0xC -- 1100
+        if     dx == 0x1 then @x -= @speed
+        elseif dx == 0x2 then @x += @speed
+        if     dy == 0x4 then @y -= @speed
+        elseif dy == 0x8 then @y += @speed
+        return @
+        
+    -- refresh the position of the character
+    refresh: (x, y, inter)=>
+        -- interpolate the move
+        if inter ~= nil
+            dx = x - @x
+            dy = y - @y
+            @x += dx * inter
+            @y += dy * inter
+        else
+            @x = x
+            @y = y
         return @
     
     -- draw the character
@@ -49,14 +55,15 @@ class  Player
         gfx.circle 'fill', @x, @y, @radius, @radius
         gfx.setColor 255, 255, 255
         gfx.print @name, @x - (gfx.getFont!\getWidth(@name)/2), @y - (@radius + gfx.getFont!\getHeight!)
-    
-    -- dump infos into a string data
-    dump: (all)=>
-        return PACK.full @ if all
-        return PACK.pos  @
+        return @
 
--- extract infos from a string data
-export fill
-fill = (str, all)->
-    return UNPACK.full str if all
-    return UNPACK.pos  str
+-- get keyboard inputs
+-- generate an integer containing all of the values
+export getInputs
+getInputs = ->
+    kb = love.keyboard.isDown
+    l = if kb 'left'  then 0x1 else 0 -- 0001
+    r = if kb 'right' then 0x2 else 0 -- 0010
+    u = if kb 'up'    then 0x4 else 0 -- 0100
+    d = if kb 'down'  then 0x8 else 0 -- 1000
+    return bit.bor l,r,u,d
