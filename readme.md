@@ -14,19 +14,23 @@ in the *root* directory of the project.
 
 run the command
 ```
-love build server
+love build --server
 ```
 to launch the server.
 
 Then run the command
 ```
-love build
+love build --name "name of your player"
 ```
 to launch a client.
+
+You can set the server address and port with the arguments `--address` and `--port` like so:
+```
+love build --server   --address 127.0.0.0 --port 8080
+love build --name Bob --address 127.0.0.0 --port 8080
+```
 
 ## Credits
 * [LÖVE](https://love2d.org/)
 * [MoonScript](http://moonscript.org/)
 * [lua-struct by iryont](https://github.com/iryont/lua-struct)
-[//]: <> (* [utf8.lua by markandgo](https://gist.github.com/markandgo/5776124))
-[//]: <> (* [Debug by kalle2990](https://love2d.org/forums/viewtopic.php?f=5&t=2473))
