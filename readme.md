@@ -37,5 +37,5 @@ love build --name Bob --address 127.0.0.0 --port 8080
 * [lua-struct by iryont](https://github.com/iryont/lua-struct)
 
 
-[comment]: <> (UDP size limit : 576)
-[comment]: <> (https://stackoverflow.com/questions/1098897/what-is-the-largest-safe-udp-packet-size-on-the-internet)
+<!-- UDP size limit : 576 -->
+<!-- https://stackoverflow.com/questions/1098897/what-is-the-largest-safe-udp-packet-size-on-the-internet -->
