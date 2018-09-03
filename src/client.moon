@@ -156,13 +156,18 @@ draw   = -> playerList\draw!
 
 export LOAD
 LOAD = (args)->
+    myPlayer.name  = 'noname'
+    myPlayer.red   = math.random(5,255)
+    myPlayer.green = math.random(5,255)
+    myPlayer.blue  = math.random(5,255)
     for i,arg in pairs args
         nextArg = args[i+1]
-        switch arg
-            when '--name' then myPlayer.name  = nextArg or 'noname'
-            when '-r'     then myPlayer.red   = nextArg or math.random(5,255)
-            when '-g'     then myPlayer.green = nextArg or math.random(5,255)
-            when '-b'     then myPlayer.blue  = nextArg or math.random(5,255)
+        if nextArg ~= nil
+            switch arg
+                when '--name' then myPlayer.name  = nextArg
+                when '-r'     then myPlayer.red   = nextArg
+                when '-g'     then myPlayer.green = nextArg
+                when '-b'     then myPlayer.blue  = nextArg
     love.window.setTitle 'CLIENT '..myPlayer.name
     client\init ADDRESS,PORT
     love.draw, love.update, love.quit = draw, update, quit
