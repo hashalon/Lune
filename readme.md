@@ -1,6 +1,7 @@
 # Lune
 
 A basic network project made with LÖVE and MoonScript.
+![Screenshot](screenshot.png)
 
 ## Compile
 
@@ -34,3 +35,7 @@ love build --name Bob --address 127.0.0.0 --port 8080
 * [LÖVE](https://love2d.org/)
 * [MoonScript](http://moonscript.org/)
 * [lua-struct by iryont](https://github.com/iryont/lua-struct)
+
+
+[comment]: <> (UDP size limit : 576)
+[comment]: <> (https://stackoverflow.com/questions/1098897/what-is-the-largest-safe-udp-packet-size-on-the-internet)
